@@ -9,4 +9,5 @@ public class ExamRequestDTO {
     private LocalDate examDate;
     private String subject;
     private double score;
+    private String term; // Add term to request DTO
 }

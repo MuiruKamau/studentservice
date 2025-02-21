@@ -27,4 +27,7 @@ public class Exam {
 
     private String grade; // Added Grade
     private int gradePoints; // Added Grade Points
+
+    @Column(nullable = false) // Add term field - Ensure not nullable
+    private String term; // e.g., "Term 1", "Term 2", "Term 3"
 }

@@ -37,6 +37,7 @@ public class ExamService {
                 .examDate(examRequestDTO.getExamDate())
                 .subject(examRequestDTO.getSubject())
                 .score(examRequestDTO.getScore())
+                .term(examRequestDTO.getTerm())
                 .build();
 
         Exam savedExam = examRepository.save(exam);
@@ -45,10 +46,13 @@ public class ExamService {
         return mapToDTO(savedExam);
     }
 
-    public ExamResponseDTO getExamById(Long id) {
-        return examRepository.findById(id)
+    public List<ExamResponseDTO> getExamsByStudentId(Long studentId, String term, String subject) { // Accepts studentId, term, subject
+        List<Exam> exams = examRepository.findByStudentId(studentId); // Get all exams for the student initially
+        return exams.stream()
+                .filter(exam -> term == null || exam.getTerm().equalsIgnoreCase(term)) // Filter by term if provided
+                .filter(exam -> subject == null || exam.getSubject().equalsIgnoreCase(subject)) // Filter by subject if provided
                 .map(this::mapToDTO)
-                .orElse(null);
+                .collect(Collectors.toList());
     }
 
     public List<ExamResponseDTO> getAllExams() {
@@ -57,11 +61,21 @@ public class ExamService {
                 .collect(Collectors.toList());
     }
 
+
+
     public List<ExamResponseDTO> getExamsByStudentId(Long studentId) {
         return examRepository.findByStudentId(studentId).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
+
+
+    public ExamResponseDTO getExamById(Long id) { // ADDED METHOD - getExamById
+        return examRepository.findById(id)
+                .map(this::mapToDTO)
+                .orElse(null);
+    }
+
 
     public ExamResponseDTO updateExam(Long id, ExamRequestDTO examRequestDTO) {
         return examRepository.findById(id)
@@ -71,6 +85,7 @@ public class ExamService {
                     existingExam.setExamDate(examRequestDTO.getExamDate());
                     existingExam.setSubject(examRequestDTO.getSubject());
                     existingExam.setScore(examRequestDTO.getScore());
+                    existingExam.setTerm(examRequestDTO.getTerm());
 
                     calculateAndSetGrade(existingExam); // Recalculate grade if score is updated
                     Exam updatedExam = examRepository.save(existingExam);
@@ -111,7 +126,8 @@ public class ExamService {
                 exam.getScore(),
                 exam.getStudent().getId(),
                 exam.getGrade(),
-                exam.getGradePoints()
+                exam.getGradePoints(),
+                exam.getTerm()
         );
     }
 }

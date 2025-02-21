@@ -27,7 +27,7 @@ public class ExamController {
             ExamResponseDTO createdExam = examService.createExam(examRequestDTO);
             return new ResponseEntity<>(createdExam, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Or handle specific error responses
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -48,8 +48,12 @@ public class ExamController {
     }
 
     @GetMapping("/student/{studentId}")
-    public ResponseEntity<List<ExamResponseDTO>> getExamsByStudentId(@PathVariable Long studentId) {
-        List<ExamResponseDTO> exams = examService.getExamsByStudentId(studentId);
+    public ResponseEntity<List<ExamResponseDTO>> getExamsByStudentId(
+            @PathVariable Long studentId,
+            @RequestParam(value = "term", required = false) String term,
+            @RequestParam(value = "subject", required = false) String subject
+    ) {
+        List<ExamResponseDTO> exams = examService.getExamsByStudentId(studentId, term, subject);
         return new ResponseEntity<>(exams, HttpStatus.OK);
     }
 
@@ -57,20 +61,20 @@ public class ExamController {
     @PutMapping("/{id}")
     public ResponseEntity<ExamResponseDTO> updateExam(@PathVariable Long id, @RequestBody ExamRequestDTO examRequestDTO) {
         try {
-            ExamResponseDTO updatedExam = examService.updateExam(id, examRequestDTO);
+            ExamResponseDTO updatedExam = examService.updateExam(id, examRequestDTO); // CORRECTED - Instance call
             if (updatedExam != null) {
                 return new ResponseEntity<>(updatedExam, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Or handle specific error responses
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExam(@PathVariable Long id) {
-        if (examService.deleteExam(id)) {
+        if (examService.deleteExam(id)) { // CORRECTED - Instance call
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

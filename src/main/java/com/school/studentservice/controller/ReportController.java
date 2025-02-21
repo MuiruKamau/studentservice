@@ -19,12 +19,16 @@ public class ReportController {
     }
 
     @GetMapping("/students/{studentId}")
-    public ResponseEntity<StudentReportResponseDTO> getStudentReport(@PathVariable Long studentId) {
+    public ResponseEntity<StudentReportResponseDTO> getStudentReport(
+            @PathVariable Long studentId,
+            @RequestParam(value = "term", required = false) String term, // Optional term parameter
+            @RequestParam(value = "subject", required = false) String subject // Optional subject parameter
+    ) {
         try {
-            StudentReportResponseDTO report = reportService.generateStudentReport(studentId);
+            StudentReportResponseDTO report = reportService.generateStudentReport(studentId, term, subject); // Pass filters
             return new ResponseEntity<>(report, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Student not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 }

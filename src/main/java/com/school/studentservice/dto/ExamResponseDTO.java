@@ -12,10 +12,11 @@ public class ExamResponseDTO {
     private String subject;
     private double score;
     private Long studentId;
-    private String grade; // Add grade
-    private int gradePoints; // Add gradePoints
+    private String grade;
+    private int gradePoints;
+    private String term;
 
-    public ExamResponseDTO(Long id, LocalDate examDate, String subject, double score, Long studentId, String grade, int gradePoints) {
+    public ExamResponseDTO(Long id, LocalDate examDate, String subject, double score, Long studentId, String grade, int gradePoints,String term) {
         this.id = id;
         this.examDate = examDate;
         this.subject = subject;
@@ -23,5 +24,6 @@ public class ExamResponseDTO {
         this.studentId = studentId;
         this.grade = grade;
         this.gradePoints = gradePoints;
+        this.term = term;
     }
 }

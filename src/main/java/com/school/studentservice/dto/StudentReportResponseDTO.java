@@ -17,8 +17,9 @@ public class StudentReportResponseDTO {
     private List<ExamResponseDTO> results;
     private Double averageScore;
     private Integer totalPoints;
+    private String overallGrade;
 
-    public StudentReportResponseDTO(Long studentId, String studentName, String admissionNumber, String className, String streamName, LocalDate reportDate, List<ExamResponseDTO> results, Double averageScore, Integer totalPoints) {
+    public StudentReportResponseDTO(Long studentId, String studentName, String admissionNumber, String className, String streamName, LocalDate reportDate, List<ExamResponseDTO> results, Double averageScore, Integer totalPoints,String overallGrade) {
         this.studentId = studentId;
         this.studentName = studentName;
         this.admissionNumber = admissionNumber;
@@ -28,5 +29,6 @@ public class StudentReportResponseDTO {
         this.results = results;
         this.averageScore = averageScore;
         this.totalPoints = totalPoints;
+        this.overallGrade = overallGrade;
     }
 }
