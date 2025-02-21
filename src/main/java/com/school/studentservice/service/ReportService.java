@@ -57,13 +57,13 @@ public class ReportService {
         );
     }
 
-    private String calculateOverallGrade(int totalPoints) {
+    private String calculateOverallGrade(int totalPoints) { // Method name remains the same, but now uses average points
         List<GradeCriteriaResponseDTO> gradeCriteriaList = configurationServiceClient.getAllGrades();
         String overallGrade = "F"; // Default grade
         for (GradeCriteriaResponseDTO criteria : gradeCriteriaList) {
-            if (totalPoints >= criteria.getPoints()) { // Assuming points are cumulative and higher points mean better grade
+            if (totalPoints >= criteria.getPoints()) {
                 overallGrade = criteria.getGrade();
-                break; // Return the first matching grade (assuming grades are ordered best to worst in criteria)
+                break;
             }
         }
         return overallGrade;
