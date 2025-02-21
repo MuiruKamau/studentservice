@@ -1,0 +1,40 @@
+server:
+  port: 8082 # Or your desired port for Student Service
+
+spring:
+  application:
+    name: student-service # Important: Must match @FeignClient name in ConfigurationServiceClient
+  datasource:
+    # Using the database URL you provided (schoolmanagement) - you can change it to school_student_db if preferred
+    url: jdbc:mysql://localhost:3306/schoolmanagement?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+    # url: jdbc:mysql://localhost:3306/school_student_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true # Alternatively, dedicated student DB
+    username: root # Your MySQL username
+    password: Ben@24 # Your MySQL password
+    driver-class-name: com.mysql.cj.jdbc.Driver # MySQL Driver
+
+  jpa:
+    show-sql: true # Set to false in production
+    hibernate:
+      ddl-auto: update # Use 'update' for production, 'create-drop' for dev (careful with data loss!)
+      format_sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect # MySQL Dialect
+
+  web:
+    cors:
+      allowed-origins: "*"
+      allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+      allowed-headers: "*"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/ # URL of your Eureka Server
+
+logging:
+  level:
+    org.springframework.security: DEBUG # Debug logging for Spring Security (if you add security later)
+    com.school.studentservice.client: DEBUG # Optional: Debug logging for Feign Client (useful for troubleshooting)
+
+
