@@ -11,20 +11,20 @@ public class StudentReportResponseDTO {
     private Long studentId;
     private String studentName;
     private String admissionNumber;
-    private String className; // Now String, not ID
-    private String streamName; // Now String, not ID
+    private Long classId;
+    private Long streamId;
     private LocalDate reportDate;
     private List<ExamResponseDTO> results;
     private Double averageScore;
     private Integer totalPoints;
     private String overallGrade;
 
-    public StudentReportResponseDTO(Long studentId, String studentName, String admissionNumber, String className, String streamName, LocalDate reportDate, List<ExamResponseDTO> results, Double averageScore, Integer totalPoints,String overallGrade) {
+    public StudentReportResponseDTO(Long studentId, String studentName, String admissionNumber, Long classId, Long streamId, LocalDate reportDate, List<ExamResponseDTO> results, Double averageScore, Integer totalPoints,String overallGrade) {
         this.studentId = studentId;
         this.studentName = studentName;
         this.admissionNumber = admissionNumber;
-        this.className = className;
-        this.streamName = streamName;
+        this.classId = classId;
+        this.streamId = streamId;
         this.reportDate = reportDate;
         this.results = results;
         this.averageScore = averageScore;

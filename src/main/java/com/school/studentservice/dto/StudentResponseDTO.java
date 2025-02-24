@@ -15,10 +15,10 @@ public class StudentResponseDTO {
     private String address;
     private String contactNumber;
     private ParentDetailsDTO parentDetails;
-    private String className;
-    private String streamName;
+    private Long classId;
+    private Long streamId;
 
-    public StudentResponseDTO(Long id, String name, String admissionNumber, LocalDate dateOfBirth, LocalDate enrollmentDate, String address, String contactNumber, ParentDetailsDTO parentDetails, String className, String streamName) {
+    public StudentResponseDTO(Long id, String name, String admissionNumber, LocalDate dateOfBirth, LocalDate enrollmentDate, String address, String contactNumber, ParentDetailsDTO parentDetails, Long classId, Long streamId) {
         this.id = id;
         this.name = name;
         this.admissionNumber = admissionNumber;
@@ -27,7 +27,7 @@ public class StudentResponseDTO {
         this.address = address;
         this.contactNumber = contactNumber;
         this.parentDetails = parentDetails;
-        this.className = className;
-        this.streamName = streamName;
+        this.classId = classId;
+        this.streamId = streamId;
     }
 }

@@ -9,17 +9,17 @@ import java.time.LocalDate;
 public class ExamResponseDTO {
     private Long id;
     private LocalDate examDate;
-    private String subject;
+    private Long subjectId;
     private double score;
     private Long studentId;
     private String grade;
     private int gradePoints;
     private String term;
 
-    public ExamResponseDTO(Long id, LocalDate examDate, String subject, double score, Long studentId, String grade, int gradePoints,String term) {
+    public ExamResponseDTO(Long id, LocalDate examDate, Long subjectId, double score, Long studentId, String grade, int gradePoints,String term) {
         this.id = id;
         this.examDate = examDate;
-        this.subject = subject;
+        this.subjectId = subjectId;
         this.score = score;
         this.studentId = studentId;
         this.grade = grade;

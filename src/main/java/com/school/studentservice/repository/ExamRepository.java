@@ -8,7 +8,9 @@ import java.util.List;
 @Repository
 public interface ExamRepository extends JpaRepository<Exam, Long> {
     List<Exam> findByStudentId(Long studentId);
-    List<Exam> findByStudentIdAndTermAndSubject(Long studentId, String term, String subject);
+    // Corrected method name: use SubjectId instead of Subject
+    List<Exam> findByStudentIdAndTermAndSubjectId(Long studentId, String term, Long subjectId); // Renamed to SubjectId
     List<Exam> findByStudentIdAndTerm(Long studentId, String term);
-    List<Exam> findByStudentIdAndSubject(Long studentId, String subject);
+    // Corrected method name: use SubjectId instead of Subject
+    List<Exam> findByStudentIdAndSubjectId(Long studentId, Long subjectId); // Renamed to SubjectId
 }

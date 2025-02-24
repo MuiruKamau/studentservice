@@ -35,7 +35,7 @@ public class ExamService {
         Exam exam = Exam.builder()
                 .student(student)
                 .examDate(examRequestDTO.getExamDate())
-                .subject(examRequestDTO.getSubject())
+                .subjectId(examRequestDTO.getSubjectId())
                 .score(examRequestDTO.getScore())
                 .term(examRequestDTO.getTerm())
                 .build();
@@ -50,7 +50,7 @@ public class ExamService {
         List<Exam> exams = examRepository.findByStudentId(studentId); // Get all exams for the student initially
         return exams.stream()
                 .filter(exam -> term == null || exam.getTerm().equalsIgnoreCase(term)) // Filter by term if provided
-                .filter(exam -> subject == null || exam.getSubject().equalsIgnoreCase(subject)) // Filter by subject if provided
+                //.filter(exam -> subject == null || exam.getSubjectId().equalsIgnoreCase(subject)) // Filter by subject if provided
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
@@ -83,7 +83,7 @@ public class ExamService {
                     // Student student = studentRepository.findById(examRequestDTO.getStudentId()) - Student cannot be changed for existing exam
                     //        .orElseThrow(() -> new IllegalArgumentException("Student not found with id: " + examRequestDTO.getStudentId()));
                     existingExam.setExamDate(examRequestDTO.getExamDate());
-                    existingExam.setSubject(examRequestDTO.getSubject());
+                    existingExam.setSubjectId(examRequestDTO.getSubjectId());
                     existingExam.setScore(examRequestDTO.getScore());
                     existingExam.setTerm(examRequestDTO.getTerm());
 
@@ -122,7 +122,7 @@ public class ExamService {
         return new ExamResponseDTO(
                 exam.getId(),
                 exam.getExamDate(),
-                exam.getSubject(),
+                exam.getSubjectId(),
                 exam.getScore(),
                 exam.getStudent().getId(),
                 exam.getGrade(),

@@ -11,6 +11,6 @@ public class StudentRequestDTO {
     private String address;
     private String contactNumber;
     private ParentDetailsDTO parentDetails;
-    private String className;
-    private String streamName;
+    private Long classId;
+    private Long streamId;
 }

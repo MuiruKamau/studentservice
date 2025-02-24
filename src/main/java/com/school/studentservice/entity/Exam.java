@@ -16,7 +16,7 @@ public class Exam {
     private LocalDate examDate;
 
     @Column(nullable = false)
-    private String subject;  // Can be an identifier or name from the LearningSubject entity
+    private Long subjectId;
 
     @Column(nullable = false)
     private double score;

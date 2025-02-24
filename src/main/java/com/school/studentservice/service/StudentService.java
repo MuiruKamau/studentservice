@@ -43,8 +43,8 @@ public class StudentService {
                 studentRequestDTO.getAddress(),
                 studentRequestDTO.getContactNumber(),
                 parentDetails,
-                studentRequestDTO.getClassName(),
-                studentRequestDTO.getStreamName(),
+                studentRequestDTO.getClassId(),
+                studentRequestDTO.getStreamId(),
                 null // Exams set will be handled by JPA
         );
 
@@ -84,8 +84,8 @@ public class StudentService {
                             studentRequestDTO.getParentDetails().getAddress()
                     );
                     existingStudent.setParentDetails(parentDetails);
-                    existingStudent.setClassName(studentRequestDTO.getClassName());
-                    existingStudent.setStreamName(studentRequestDTO.getStreamName());
+                    existingStudent.setClassId(studentRequestDTO.getClassId());
+                    existingStudent.setStreamId(studentRequestDTO.getStreamId());
 
                     Student updatedStudent = studentRepository.save(existingStudent);
                     return mapToDTO(updatedStudent);
@@ -117,8 +117,8 @@ public class StudentService {
                 student.getAddress(),
                 student.getContactNumber(),
                 parentDetailsDTO,
-                student.getClassName(),
-                student.getStreamName()
+                student.getClassId(),
+                student.getStreamId()
         );
     }
 

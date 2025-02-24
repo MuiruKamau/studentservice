@@ -33,17 +33,17 @@ public class Student {
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "parentName", column = @Column(name = "parent_name")), // Rename embedded parentName
-            @AttributeOverride(name = "contact", column = @Column(name = "parent_contact")),   // Rename embedded contact
-            @AttributeOverride(name = "address", column = @Column(name = "parent_address"))    // Rename embedded address
+            @AttributeOverride(name = "parentName", column = @Column(name = "parent_name")),
+            @AttributeOverride(name = "contact", column = @Column(name = "parent_contact")),
+            @AttributeOverride(name = "address", column = @Column(name = "parent_address"))
     })
     private ParentDetails parentDetails;
 
     @Column(nullable = false)
-    private String className;
+    private Long classId;
 
     @Column(nullable = false)
-    private String streamName;
+    private Long streamId;
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Exam> exams;
