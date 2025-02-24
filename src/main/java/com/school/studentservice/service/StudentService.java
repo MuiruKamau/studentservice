@@ -1,9 +1,9 @@
 package com.school.studentservice.service;
 
-import com.school.studentservice.dto.ParentDetailsDTO;
-import com.school.studentservice.dto.StudentRequestDTO;
-import com.school.studentservice.dto.StudentResponseDTO;
+import com.school.studentservice.dto.*;
 import com.school.studentservice.entity.ParentDetails; // Corrected import to entity
+import com.school.studentservice.client.ConfigurationServiceClient;
+import com.school.studentservice.client.ConfigurationServiceClient;
 import com.school.studentservice.entity.Student; // Corrected import to entity
 import com.school.studentservice.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +14,13 @@ import java.util.stream.Collectors;
 
 @Service
 public class StudentService {
-
     private final StudentRepository studentRepository;
+    private final ConfigurationServiceClient configurationServiceClient;
 
-    @Autowired
-    public StudentService(StudentRepository studentRepository) {
+    @Autowired // Only one constructor now
+    public StudentService(StudentRepository studentRepository, ConfigurationServiceClient configurationServiceClient) {
         this.studentRepository = studentRepository;
+        this.configurationServiceClient = configurationServiceClient; // Initialization
     }
 
     public StudentResponseDTO createStudent(StudentRequestDTO studentRequestDTO) {
@@ -102,11 +103,20 @@ public class StudentService {
     }
 
     private StudentResponseDTO mapToDTO(Student student) {
-        ParentDetailsDTO parentDetailsDTO = new ParentDetailsDTO( // Using constructor for ParentDetailsDTO
+        ParentDetailsDTO parentDetailsDTO = new ParentDetailsDTO(
                 student.getParentDetails().getParentName(),
                 student.getParentDetails().getContact(),
                 student.getParentDetails().getAddress()
         );
+
+        // Fetch Class Name from Configuration Service
+        SchoolClassResponseDTO classDto = configurationServiceClient.getClassById(student.getClassId());
+        String className = (classDto != null) ? classDto.getName() : "N/A";
+
+        // Fetch Stream Name from Configuration Service
+        StreamResponseDTO streamDto = configurationServiceClient.getStreamById(student.getStreamId());
+        String streamName = (streamDto != null) ? streamDto.getName() : "N/A";
+
 
         return new StudentResponseDTO(
                 student.getId(),
@@ -118,9 +128,12 @@ public class StudentService {
                 student.getContactNumber(),
                 parentDetailsDTO,
                 student.getClassId(),
-                student.getStreamId()
+                student.getStreamId(),
+                className, // Set className in StudentResponseDTO
+                streamName // Set streamName in StudentResponseDTO
         );
     }
+
 
     private String generateAdmissionNumber() {
         String prefix = "SMS";

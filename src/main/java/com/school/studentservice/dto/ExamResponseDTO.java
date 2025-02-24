@@ -15,8 +15,9 @@ public class ExamResponseDTO {
     private String grade;
     private int gradePoints;
     private String term;
+    private String subjectName; // Add subjectName for display
 
-    public ExamResponseDTO(Long id, LocalDate examDate, Long subjectId, double score, Long studentId, String grade, int gradePoints,String term) {
+    public ExamResponseDTO(Long id, LocalDate examDate, Long subjectId, double score, Long studentId, String grade, int gradePoints, String term, String subjectName) {
         this.id = id;
         this.examDate = examDate;
         this.subjectId = subjectId;
@@ -25,5 +26,7 @@ public class ExamResponseDTO {
         this.grade = grade;
         this.gradePoints = gradePoints;
         this.term = term;
+        this.subjectName = subjectName; // Initialize subjectName
     }
 }
+

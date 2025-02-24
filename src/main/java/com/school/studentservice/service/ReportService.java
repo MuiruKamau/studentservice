@@ -4,6 +4,9 @@ import com.school.studentservice.client.ConfigurationServiceClient;
 import com.school.studentservice.dto.ExamResponseDTO;
 import com.school.studentservice.dto.GradeCriteriaResponseDTO;
 import com.school.studentservice.dto.StudentReportResponseDTO;
+import com.school.studentservice.dto.SchoolClassResponseDTO; // Import SchoolClassResponseDTO
+import com.school.studentservice.dto.StreamResponseDTO;      // Import StreamResponseDTO
+import com.school.studentservice.dto.LearningSubjectResponseDTO; // Import LearningSubjectResponseDTO
 import com.school.studentservice.entity.Student;
 import com.school.studentservice.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +20,7 @@ public class ReportService {
 
     private final StudentRepository studentRepository;
     private final ExamService examService;
-    private final ConfigurationServiceClient configurationServiceClient; // Inject ConfigurationServiceClient
+    private final ConfigurationServiceClient configurationServiceClient;
 
     @Autowired
     public ReportService(StudentRepository studentRepository, ExamService examService, ConfigurationServiceClient configurationServiceClient) {
@@ -30,18 +33,33 @@ public class ReportService {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found with id: " + studentId));
 
-        List<ExamResponseDTO> examResults = examService.getExamsByStudentId(studentId, term, subject); // Pass filters
+        // Fetch Class Name from Configuration Service using classId
+        SchoolClassResponseDTO classDto = configurationServiceClient.getClassById(student.getClassId());
+        String className = (classDto != null) ? classDto.getName() : "N/A";
 
-        double averageScore = examResults.stream()
+        // Fetch Stream Name from Configuration Service using streamId
+        StreamResponseDTO streamDto = configurationServiceClient.getStreamById(student.getStreamId());
+        String streamName = (streamDto != null) ? streamDto.getName() : "N/A";
+
+
+        List<ExamResponseDTO> examResults = examService.getExamsByStudentId(studentId, term, subject);
+
+        // Enhance ExamResponseDTOs in results to include subject names
+        List<ExamResponseDTO> enhancedExamResults = examResults.stream()
+                .map(this::enhanceExamResponseWithSubjectName) // Call helper method to add subject name
+                .collect(Collectors.toList());
+
+
+        double averageScore = enhancedExamResults.stream() // Use enhanced exam results
                 .mapToDouble(ExamResponseDTO::getScore)
                 .average()
                 .orElse(0.0);
 
-        int totalPoints = examResults.stream()
+        int totalPoints = enhancedExamResults.stream() // Use enhanced exam results
                 .mapToInt(ExamResponseDTO::getGradePoints)
                 .sum();
 
-        String overallGrade = calculateOverallGrade(totalPoints); // Calculate overall grade
+        String overallGrade = calculateOverallGrade(totalPoints);
 
         return new StudentReportResponseDTO(
                 student.getId(),
@@ -49,17 +67,39 @@ public class ReportService {
                 student.getAdmissionNumber(),
                 student.getClassId(),
                 student.getStreamId(),
+                className,           // Use fetched className
+                streamName,          // Use fetched streamName
                 LocalDate.now(),
-                examResults,
+                enhancedExamResults, // Use enhanced exam results with subject names
                 averageScore,
                 totalPoints,
-                overallGrade // Include overall grade in report
+                overallGrade
         );
     }
 
-    private String calculateOverallGrade(int totalPoints) { // Method name remains the same, but now uses average points
+    private ExamResponseDTO enhanceExamResponseWithSubjectName(ExamResponseDTO examResponseDTO) {
+        // Fetch Subject Name from Configuration Service using subjectId
+        LearningSubjectResponseDTO subjectDto = configurationServiceClient.getLearningSubjectById(examResponseDTO.getSubjectId());
+        String subjectName = (subjectDto != null) ? subjectDto.getName() : "N/A";
+
+        // Create a new ExamResponseDTO with subjectName
+        return new ExamResponseDTO(
+                examResponseDTO.getId(),
+                examResponseDTO.getExamDate(),
+                examResponseDTO.getSubjectId(), // Keep subjectId
+                examResponseDTO.getScore(),
+                examResponseDTO.getStudentId(),
+                examResponseDTO.getGrade(),
+                examResponseDTO.getGradePoints(),
+                examResponseDTO.getTerm(),
+                subjectName // Add subjectName to the DTO
+        );
+    }
+
+
+    private String calculateOverallGrade(int totalPoints) {
         List<GradeCriteriaResponseDTO> gradeCriteriaList = configurationServiceClient.getAllGrades();
-        String overallGrade = "F"; // Default grade
+        String overallGrade = "F";
         for (GradeCriteriaResponseDTO criteria : gradeCriteriaList) {
             if (totalPoints >= criteria.getPoints()) {
                 overallGrade = criteria.getGrade();

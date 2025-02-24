@@ -4,6 +4,7 @@ import com.school.studentservice.client.ConfigurationServiceClient;
 import com.school.studentservice.dto.ExamRequestDTO;
 import com.school.studentservice.dto.ExamResponseDTO;
 import com.school.studentservice.dto.GradeCriteriaResponseDTO;
+import com.school.studentservice.dto.LearningSubjectResponseDTO;
 import com.school.studentservice.entity.Exam;
 import com.school.studentservice.entity.Student;
 import com.school.studentservice.repository.ExamRepository;
@@ -119,6 +120,11 @@ public class ExamService {
     }
 
     private ExamResponseDTO mapToDTO(Exam exam) {
+        // Fetch Subject Name from Configuration Service
+        LearningSubjectResponseDTO subjectDto = configurationServiceClient.getLearningSubjectById(exam.getSubjectId());
+        String subjectName = (subjectDto != null) ? subjectDto.getName() : "N/A";
+
+
         return new ExamResponseDTO(
                 exam.getId(),
                 exam.getExamDate(),
@@ -127,7 +133,8 @@ public class ExamService {
                 exam.getStudent().getId(),
                 exam.getGrade(),
                 exam.getGradePoints(),
-                exam.getTerm()
+                exam.getTerm(),
+                subjectName // Set subjectName in ExamResponseDTO
         );
     }
 }

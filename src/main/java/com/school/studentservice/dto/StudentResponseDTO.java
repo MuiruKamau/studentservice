@@ -17,8 +17,12 @@ public class StudentResponseDTO {
     private ParentDetailsDTO parentDetails;
     private Long classId;
     private Long streamId;
+    private String className;     // Add className for StudentResponseDTO
+    private String streamName;    // Add streamName for StudentResponseDTO
 
-    public StudentResponseDTO(Long id, String name, String admissionNumber, LocalDate dateOfBirth, LocalDate enrollmentDate, String address, String contactNumber, ParentDetailsDTO parentDetails, Long classId, Long streamId) {
+
+
+    public StudentResponseDTO(Long id, String name, String admissionNumber, LocalDate dateOfBirth, LocalDate enrollmentDate, String address, String contactNumber, ParentDetailsDTO parentDetails, Long classId, Long streamId, String className, String streamName) {
         this.id = id;
         this.name = name;
         this.admissionNumber = admissionNumber;
@@ -29,5 +33,7 @@ public class StudentResponseDTO {
         this.parentDetails = parentDetails;
         this.classId = classId;
         this.streamId = streamId;
+        this.className = className;   // Initialize className
+        this.streamName = streamName;  // Initialize streamName
     }
 }
