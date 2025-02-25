@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@FeignClient(name = "configuration-service") // Name of the Configuration Service
+@FeignClient(name = "configuration-service",configuration = FeignClientConfig.class) // Name of the Configuration Service
 public interface ConfigurationServiceClient {
 
     @GetMapping("/api/config/grade-criteria")
