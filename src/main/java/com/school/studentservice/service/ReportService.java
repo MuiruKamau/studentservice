@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,7 +32,7 @@ public class ReportService {
         this.configurationServiceClient = configurationServiceClient;
     }
 
-    public StudentReportResponseDTO generateStudentReport(Long studentId, String term, String subject) {
+    public StudentReportResponseDTO generateStudentReport(Long studentId, String term, String examType, String subject) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found with id: " + studentId));
 
@@ -43,23 +44,33 @@ public class ReportService {
         StreamResponseDTO streamDto = configurationServiceClient.getStreamById(student.getStreamId());
         String streamName = (streamDto != null) ? streamDto.getName() : "N/A";
 
-        List<ExamResponseDTO> examResults = examService.getExamsByStudentId(studentId, term, subject);
+        // Get exams with filters
+        List<ExamResponseDTO> examResults = examService.getExamsByStudentIdWithFilters(studentId, term, examType, subject);
 
         // Enhance ExamResponseDTOs in results to include subject names
         List<ExamResponseDTO> enhancedExamResults = examResults.stream()
                 .map(this::enhanceExamResponseWithSubjectName)
                 .collect(Collectors.toList());
 
+        // Calculate average score
         double averageScore = enhancedExamResults.stream()
                 .mapToDouble(ExamResponseDTO::getScore)
                 .average()
                 .orElse(0.0);
 
+        // Calculate total grade points
         int totalPoints = enhancedExamResults.stream()
                 .mapToInt(ExamResponseDTO::getGradePoints)
                 .sum();
 
-        String overallGrade = calculateOverallGrade(totalPoints);
+        // Calculate average grade points
+        int numberOfSubjects = enhancedExamResults.size();
+        double totalAveragePoints = numberOfSubjects > 0
+                ? (double) totalPoints / numberOfSubjects
+                : 0.0;
+
+        // Calculate overall grade using the average points
+        String overallGrade = calculateOverallGrade(totalAveragePoints);
 
         return new StudentReportResponseDTO(
                 student.getId(),
@@ -77,34 +88,49 @@ public class ReportService {
         );
     }
 
-    public List<StudentReportResponseDTO> generateClassReport(Long classId, String stream, String term, String subject) {
-        List<Student> studentsInClass = studentRepository.findByClassId(classId); // Fetch students by class ID
+    public List<StudentReportResponseDTO> generateClassReport(Long classId, String stream, String term, String examType, String subject) {
+        List<Student> studentsInClass = studentRepository.findByClassId(classId);
 
-        // REMOVED Stream Filtering for now - to fix error
-        //if (stream != null && !stream.isEmpty()) {
-        //    studentsInClass = studentsInClass.stream()
-        //            .filter(student -> stream.equalsIgnoreCase(student.getStreamName())) // Error line removed
-        //            .collect(Collectors.toList());
-        //}
+        // Filter by streamId if provided
+        if (stream != null && !stream.isEmpty()) {
+            try {
+                Long streamId = Long.parseLong(stream);
+                studentsInClass = studentsInClass.stream()
+                        .filter(student -> student.getStreamId().equals(streamId))
+                        .collect(Collectors.toList());
+            } catch (NumberFormatException e) {
+                // If stream is not a valid Long, ignore the filter
+            }
+        }
 
         return studentsInClass.stream()
-                .map(student -> generateStudentReportForClassReport(student, term, subject))
+                .map(student -> generateStudentReportForClassReport(student, term, examType, subject))
                 .collect(Collectors.toList());
     }
 
-    private StudentReportResponseDTO generateStudentReportForClassReport(Student student, String term, String subject) {
-        List<ExamResponseDTO> examResults = examService.getExamsByStudentId(student.getId(), term, subject);
+    private StudentReportResponseDTO generateStudentReportForClassReport(Student student, String term, String examType, String subject) {
+        // Get exams with filters
+        List<ExamResponseDTO> examResults = examService.getExamsByStudentIdWithFilters(student.getId(), term, examType, subject);
 
+        // Calculate average score
         double averageScore = examResults.stream()
                 .mapToDouble(ExamResponseDTO::getScore)
                 .average()
                 .orElse(0.0);
 
+        // Calculate total grade points
         int totalPoints = examResults.stream()
                 .mapToInt(ExamResponseDTO::getGradePoints)
                 .sum();
 
-        String overallGrade = calculateOverallGrade(totalPoints);
+        // Calculate average grade points
+        int numberOfSubjects = examResults.size();
+        double totalAveragePoints = numberOfSubjects > 0
+                ? (double) totalPoints / numberOfSubjects
+                : 0.0;
+
+        // Calculate overall grade using the average points
+        String overallGrade = calculateOverallGrade(totalAveragePoints);
 
         // Fetch Class Name from Configuration Service using classId
         SchoolClassResponseDTO classDto = configurationServiceClient.getClassById(student.getClassId());
@@ -113,7 +139,6 @@ public class ReportService {
         // Fetch Stream Name from Configuration Service using streamId
         StreamResponseDTO streamDto = configurationServiceClient.getStreamById(student.getStreamId());
         String streamName = (streamDto != null) ? streamDto.getName() : "N/A";
-
 
         return new StudentReportResponseDTO(
                 student.getId(),
@@ -131,12 +156,12 @@ public class ReportService {
         );
     }
 
-
-    private String calculateOverallGrade(int totalPoints) { // Method name remains the same, but now uses average points
+    private String calculateOverallGrade(double averagePoints) {
         List<GradeCriteriaResponseDTO> gradeCriteriaList = configurationServiceClient.getAllGrades();
         String overallGrade = "F"; // Default grade
+
         for (GradeCriteriaResponseDTO criteria : gradeCriteriaList) {
-            if (totalPoints >= criteria.getPoints()) {
+            if (averagePoints >= criteria.getPoints()) {
                 overallGrade = criteria.getGrade();
                 break;
             }
@@ -158,11 +183,9 @@ public class ReportService {
                 examResponseDTO.getStudentId(),
                 examResponseDTO.getGrade(),
                 examResponseDTO.getGradePoints(),
-                examResponseDTO.getTerm(),          // term comes before examType
-                examResponseDTO.getExamType(),      // examType comes before subjectName
+                examResponseDTO.getTerm(),
+                examResponseDTO.getExamType(),
                 subjectName
-
-                // Add subjectName to the DTO
         );
     }
 }

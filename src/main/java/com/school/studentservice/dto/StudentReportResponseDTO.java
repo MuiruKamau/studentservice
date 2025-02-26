@@ -11,15 +11,18 @@ public class StudentReportResponseDTO {
     private Long studentId;
     private String studentName;
     private String admissionNumber;
-    private Long classId;        // Keep classId (Long)
-    private Long streamId;       // Keep streamId (Long)
-    private String className;     // Add className (String) for display
-    private String streamName;    // Add streamName (String) for display
+    private Long classId;
+    private Long streamId;
+    private String className;
+    private String streamName;
     private LocalDate reportDate;
     private List<ExamResponseDTO> results;
     private Double averageScore;
     private Integer totalPoints;
     private String overallGrade;
+
+    // Calculated fields that could be added (optional)
+    private Double averagePoints;  // Average points per subject
 
     public StudentReportResponseDTO(Long studentId, String studentName, String admissionNumber, Long classId, Long streamId, String className, String streamName, LocalDate reportDate, List<ExamResponseDTO> results, Double averageScore, Integer totalPoints, String overallGrade) {
         this.studentId = studentId;
@@ -27,12 +30,15 @@ public class StudentReportResponseDTO {
         this.admissionNumber = admissionNumber;
         this.classId = classId;
         this.streamId = streamId;
-        this.className = className;      // Initialize className
-        this.streamName = streamName;     // Initialize streamName
+        this.className = className;
+        this.streamName = streamName;
         this.reportDate = reportDate;
         this.results = results;
         this.averageScore = averageScore;
         this.totalPoints = totalPoints;
         this.overallGrade = overallGrade;
+
+        // Calculate and set the average points
+        this.averagePoints = results.isEmpty() ? 0.0 : (double) totalPoints / results.size();
     }
 }

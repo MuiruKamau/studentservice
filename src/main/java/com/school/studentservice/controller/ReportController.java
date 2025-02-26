@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List; // Import List
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/reports")
@@ -26,10 +26,11 @@ public class ReportController {
     public ResponseEntity<StudentReportResponseDTO> getStudentReport(
             @PathVariable Long studentId,
             @RequestParam(value = "term", required = false) String term,
+            @RequestParam(value = "examType", required = false) String examType,
             @RequestParam(value = "subject", required = false) String subject
     ) {
         try {
-            StudentReportResponseDTO report = reportService.generateStudentReport(studentId, term, subject);
+            StudentReportResponseDTO report = reportService.generateStudentReport(studentId, term, examType, subject);
             return new ResponseEntity<>(report, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -37,15 +38,16 @@ public class ReportController {
     }
 
     @GetMapping("/classes/{classId}")
-    @PreAuthorize("hasAnyRole('TEACHER', 'ADMINISTRATOR')") // New endpoint for class reports - CORRECTED PATH
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMINISTRATOR')")
     public ResponseEntity<List<StudentReportResponseDTO>> getClassReport(
             @PathVariable Long classId,
-            @RequestParam(value = "stream", required = false) String stream, // Optional stream parameter
-            @RequestParam(value = "term", required = false) String term,     // Optional term parameter
-            @RequestParam(value = "subject", required = false) String subject // Optional subject parameter
+            @RequestParam(value = "stream", required = false) String stream,
+            @RequestParam(value = "term", required = false) String term,
+            @RequestParam(value = "examType", required = false) String examType,
+            @RequestParam(value = "subject", required = false) String subject
     ) {
         try {
-            List<StudentReportResponseDTO> reports = reportService.generateClassReport(classId, stream, term, subject);
+            List<StudentReportResponseDTO> reports = reportService.generateClassReport(classId, stream, term, examType, subject);
             return new ResponseEntity<>(reports, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
