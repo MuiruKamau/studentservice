@@ -1,5 +1,7 @@
 package com.school.studentservice.dto;
 
+import com.school.studentservice.entity.ExamType;
+import com.school.studentservice.entity.Term;
 import lombok.Data;
 import java.time.LocalDate;
 
@@ -9,5 +11,6 @@ public class ExamRequestDTO {
     private LocalDate examDate;
     private Long subjectId;
     private double score;
-    private String term; // Add term to request DTO
+    private Term term;
+    private ExamType examType;
 }

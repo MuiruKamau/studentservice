@@ -1,5 +1,8 @@
+
 package com.school.studentservice.dto;
 
+import com.school.studentservice.entity.ExamType;
+import com.school.studentservice.entity.Term;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
@@ -14,10 +17,11 @@ public class ExamResponseDTO {
     private Long studentId;
     private String grade;
     private int gradePoints;
-    private String term;
-    private String subjectName; // Add subjectName for display
+    private Term term;
+    private ExamType examType;
+    private String subjectName;
 
-    public ExamResponseDTO(Long id, LocalDate examDate, Long subjectId, double score, Long studentId, String grade, int gradePoints, String term, String subjectName) {
+    public ExamResponseDTO(Long id, LocalDate examDate, Long subjectId, double score, Long studentId, String grade, int gradePoints, Term term, ExamType examType, String subjectName) {
         this.id = id;
         this.examDate = examDate;
         this.subjectId = subjectId;
@@ -26,7 +30,7 @@ public class ExamResponseDTO {
         this.grade = grade;
         this.gradePoints = gradePoints;
         this.term = term;
-        this.subjectName = subjectName; // Initialize subjectName
+        this.examType = examType;
+        this.subjectName = subjectName;
     }
 }
-

@@ -7,7 +7,9 @@ import com.school.studentservice.dto.StudentReportResponseDTO;
 import com.school.studentservice.dto.SchoolClassResponseDTO;
 import com.school.studentservice.dto.StreamResponseDTO;
 import com.school.studentservice.dto.LearningSubjectResponseDTO;
+import com.school.studentservice.entity.ExamType;
 import com.school.studentservice.entity.Student;
+import com.school.studentservice.entity.Term;
 import com.school.studentservice.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -151,17 +153,19 @@ public class ReportService {
         return new ExamResponseDTO(
                 examResponseDTO.getId(),
                 examResponseDTO.getExamDate(),
-                examResponseDTO.getSubjectId(), // Keep subjectId
+                examResponseDTO.getSubjectId(),
                 examResponseDTO.getScore(),
                 examResponseDTO.getStudentId(),
                 examResponseDTO.getGrade(),
                 examResponseDTO.getGradePoints(),
-                examResponseDTO.getTerm(),
-                subjectName // Add subjectName to the DTO
+                examResponseDTO.getTerm(),          // term comes before examType
+                examResponseDTO.getExamType(),      // examType comes before subjectName
+                subjectName
+
+                // Add subjectName to the DTO
         );
     }
 }
-
 
 
 

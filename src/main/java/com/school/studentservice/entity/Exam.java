@@ -1,5 +1,8 @@
+
 package com.school.studentservice.entity;
 
+import com.school.studentservice.entity.ExamType;
+import com.school.studentservice.entity.Term;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -25,9 +28,14 @@ public class Exam {
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
-    private String grade; // Added Grade
-    private int gradePoints; // Added Grade Points
+    private String grade;
+    private int gradePoints;
 
-    @Column(nullable = false) // Add term field - Ensure not nullable
-    private String term; // e.g., "Term 1", "Term 2", "Term 3"
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Term term;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ExamType examType;
 }
