@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @SuppressWarnings("ALL")
 @Configuration
+@EnableMethodSecurity(prePostEnabled = true) // Enable method security
 public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
@@ -55,19 +57,7 @@ public class SecurityConfig {
                                 "/auth/public"
                         ).permitAll()
 
-                        // Admin and Teacher can access everything
 
-
-                        // Student can only access their permitted endpoints
-                        //.requestMatchers(HttpMethod.GET,
-                               // "/api/students/{studentId}",
-                               // "/api/students/admission-number/{admissionNumber}",
-                                //"/api/exams/student/{studentId}"
-                        //).hasRole("STUDENT")
-
-                        .requestMatchers("/api/**").hasRole("ADMINISTRATOR")
-
-                        // Any other request must be authenticated
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

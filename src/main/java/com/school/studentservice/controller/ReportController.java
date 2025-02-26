@@ -5,6 +5,7 @@ import com.school.studentservice.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List; // Import List
@@ -21,6 +22,7 @@ public class ReportController {
     }
 
     @GetMapping("/students/{studentId}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'ADMINISTRATOR')")
     public ResponseEntity<StudentReportResponseDTO> getStudentReport(
             @PathVariable Long studentId,
             @RequestParam(value = "term", required = false) String term,
@@ -34,7 +36,8 @@ public class ReportController {
         }
     }
 
-    @GetMapping("/classes/{classId}") // New endpoint for class reports - CORRECTED PATH
+    @GetMapping("/classes/{classId}")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMINISTRATOR')") // New endpoint for class reports - CORRECTED PATH
     public ResponseEntity<List<StudentReportResponseDTO>> getClassReport(
             @PathVariable Long classId,
             @RequestParam(value = "stream", required = false) String stream, // Optional stream parameter

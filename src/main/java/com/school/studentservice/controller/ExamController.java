@@ -6,6 +6,7 @@ import com.school.studentservice.service.ExamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class ExamController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMINISTRATOR')")
     public ResponseEntity<ExamResponseDTO> createExam(@RequestBody ExamRequestDTO examRequestDTO) {
         try {
             ExamResponseDTO createdExam = examService.createExam(examRequestDTO);
@@ -32,6 +34,7 @@ public class ExamController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMINISTRATOR')")
     public ResponseEntity<ExamResponseDTO> getExamById(@PathVariable Long id) {
         ExamResponseDTO exam = examService.getExamById(id);
         if (exam != null) {
@@ -42,12 +45,14 @@ public class ExamController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMINISTRATOR')")
     public ResponseEntity<List<ExamResponseDTO>> getAllExams() {
         List<ExamResponseDTO> exams = examService.getAllExams();
         return new ResponseEntity<>(exams, HttpStatus.OK);
     }
 
     @GetMapping("/student/{studentId}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'ADMINISTRATOR')")
     public ResponseEntity<List<ExamResponseDTO>> getExamsByStudentId(
             @PathVariable Long studentId,
             @RequestParam(value = "term", required = false) String term,
@@ -59,6 +64,7 @@ public class ExamController {
 
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMINISTRATOR')")
     public ResponseEntity<ExamResponseDTO> updateExam(@PathVariable Long id, @RequestBody ExamRequestDTO examRequestDTO) {
         try {
             ExamResponseDTO updatedExam = examService.updateExam(id, examRequestDTO); // CORRECTED - Instance call
@@ -73,6 +79,7 @@ public class ExamController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMINISTRATOR')")
     public ResponseEntity<Void> deleteExam(@PathVariable Long id) {
         if (examService.deleteExam(id)) { // CORRECTED - Instance call
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

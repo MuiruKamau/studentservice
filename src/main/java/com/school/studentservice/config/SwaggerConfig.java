@@ -17,7 +17,7 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("Student-Service")
                         .version("1.0")
-                        .description("API documentation for pos management system"))
+                        .description("API documentation for school management system"))
                 .addSecurityItem(new SecurityRequirement().addList("BearerAuth"))
                 .components(new io.swagger.v3.oas.models.Components()
                         .addSecuritySchemes("BearerAuth", new SecurityScheme()
