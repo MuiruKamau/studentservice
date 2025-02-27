@@ -42,35 +42,48 @@ public class ReportService {
         StreamResponseDTO streamDto = configurationServiceClient.getStreamById(student.getStreamId());
         String streamName = (streamDto != null) ? streamDto.getName() : "N/A";
 
-        // Get all exams for student -  Filters are ignored based on the prompt
-        List<ExamResponseDTO> examResults = examService.getExamsByStudentId(studentId, null, null); // Term and subject filters removed
+        // Get all exams for student
+        List<ExamResponseDTO> examResults = examService.getExamsByStudentId(studentId, null, null);
 
         // Enhance ExamResponseDTOs in results to include subject names
         List<ExamResponseDTO> enhancedExamResults = examResults.stream()
                 .map(this::enhanceExamResponseWithSubjectName)
                 .collect(Collectors.toList());
 
-        // Calculate average score per exam type
-        Map<String, Double> averageScorePerExamType = enhancedExamResults.stream()
-                .collect(Collectors.groupingBy(
-                        exam -> exam.getExamType().getValue(), // Changed to get String value of ExamType
-                        Collectors.averagingDouble(ExamResponseDTO::getScore)
+        // Group exams by Term first, then by ExamType
+        Map<String, List<ExamResponseDTO>> examsGroupedByTerm = enhancedExamResults.stream()
+                .collect(Collectors.groupingBy(exam -> exam.getTerm().getValue()));
+
+        Map<String, Map<String, Double>> averageScorePerExamTypeByTerm = examsGroupedByTerm.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey, // Term (e.g., "TERM_1")
+                        termEntry -> termEntry.getValue().stream()
+                                .collect(Collectors.groupingBy(
+                                        exam -> exam.getExamType().getValue(), // ExamType (e.g., "OPENER")
+                                        Collectors.averagingDouble(ExamResponseDTO::getScore)
+                                ))
                 ));
 
+        Map<String, Map<String, Double>> averagePointsPerExamTypeByTerm = examsGroupedByTerm.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey, // Term
+                        termEntry -> termEntry.getValue().stream()
+                                .collect(Collectors.groupingBy(
+                                        exam -> exam.getExamType().getValue(), // ExamType
+                                        Collectors.averagingDouble(ExamResponseDTO::getGradePoints)
+                                ))
+                ));
 
-        // Calculate total grade points
-        int totalPoints = enhancedExamResults.stream()
-                .mapToInt(ExamResponseDTO::getGradePoints)
-                .sum();
+        Map<String, Map<String, String>> overallGradePerExamTypeByTerm = averagePointsPerExamTypeByTerm.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey, // Term
+                        termEntry -> termEntry.getValue().entrySet().stream()
+                                .collect(Collectors.toMap(
+                                        Map.Entry::getKey, // ExamType
+                                        examTypeEntry -> calculateOverallGradeForExamType(examTypeEntry.getValue()) // Average Points for ExamType
+                                ))
+                ));
 
-        // Calculate average grade points
-        int numberOfSubjects = enhancedExamResults.size();
-        double totalAveragePoints = numberOfSubjects > 0
-                ? (double) totalPoints / numberOfSubjects
-                : 0.0;
-
-        // Calculate overall grade using the average points
-        String overallGrade = calculateOverallGrade(totalAveragePoints);
 
         return new StudentReportResponseDTO(
                 student.getId(),
@@ -82,9 +95,9 @@ public class ReportService {
                 streamName,
                 LocalDate.now(),
                 enhancedExamResults,
-                averageScorePerExamType, // Using averageScorePerExamType
-                totalPoints,
-                overallGrade
+                averageScorePerExamTypeByTerm,
+                averagePointsPerExamTypeByTerm,
+                overallGradePerExamTypeByTerm
         );
     }
 
@@ -110,33 +123,47 @@ public class ReportService {
 
     private StudentReportResponseDTO generateStudentReportForClassReport(Student student, String term, String examType, String subject) {
         // Get exams with filters - Filters are ignored based on the prompt
-        List<ExamResponseDTO> examResults = examService.getExamsByStudentId(student.getId(), null, null); // Term and subject filters removed
+        List<ExamResponseDTO> examResults = examService.getExamsByStudentId(student.getId(), null, null);
 
         // Enhance ExamResponseDTOs in results to include subject names
         List<ExamResponseDTO> enhancedExamResults = examResults.stream()
                 .map(this::enhanceExamResponseWithSubjectName)
                 .collect(Collectors.toList());
 
-        // Calculate average score per exam type
-        Map<String, Double> averageScorePerExamType = enhancedExamResults.stream()
-                .collect(Collectors.groupingBy(
-                        exam -> exam.getExamType().getValue(), // Changed to get String value of ExamType
-                        Collectors.averagingDouble(ExamResponseDTO::getScore)
+        // Group exams by Term first, then by ExamType
+        Map<String, List<ExamResponseDTO>> examsGroupedByTerm = enhancedExamResults.stream()
+                .collect(Collectors.groupingBy(exam -> exam.getTerm().getValue()));
+
+        Map<String, Map<String, Double>> averageScorePerExamTypeByTerm = examsGroupedByTerm.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey, // Term (e.g., "TERM_1")
+                        termEntry -> termEntry.getValue().stream()
+                                .collect(Collectors.groupingBy(
+                                        exam -> exam.getExamType().getValue(), // ExamType (e.g., "OPENER")
+                                        Collectors.averagingDouble(ExamResponseDTO::getScore)
+                                ))
                 ));
 
-        // Calculate total grade points
-        int totalPoints = enhancedExamResults.stream()
-                .mapToInt(ExamResponseDTO::getGradePoints)
-                .sum();
+        Map<String, Map<String, Double>> averagePointsPerExamTypeByTerm = examsGroupedByTerm.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey, // Term
+                        termEntry -> termEntry.getValue().stream()
+                                .collect(Collectors.groupingBy(
+                                        exam -> exam.getExamType().getValue(), // ExamType
+                                        Collectors.averagingDouble(ExamResponseDTO::getGradePoints)
+                                ))
+                ));
 
-        // Calculate average grade points
-        int numberOfSubjects = enhancedExamResults.size();
-        double totalAveragePoints = numberOfSubjects > 0
-                ? (double) totalPoints / numberOfSubjects
-                : 0.0;
+        Map<String, Map<String, String>> overallGradePerExamTypeByTerm = averagePointsPerExamTypeByTerm.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey, // Term
+                        termEntry -> termEntry.getValue().entrySet().stream()
+                                .collect(Collectors.toMap(
+                                        Map.Entry::getKey, // ExamType
+                                        examTypeEntry -> calculateOverallGradeForExamType(examTypeEntry.getValue()) // Average Points for ExamType
+                                ))
+                ));
 
-        // Calculate overall grade using the average points
-        String overallGrade = calculateOverallGrade(totalAveragePoints);
 
         // Fetch Class Name from Configuration Service using classId
         SchoolClassResponseDTO classDto = configurationServiceClient.getClassById(student.getClassId());
@@ -156,17 +183,18 @@ public class ReportService {
                 streamName,
                 LocalDate.now(),
                 enhancedExamResults,
-                averageScorePerExamType, // Using averageScorePerExamType
-                totalPoints,
-                overallGrade
+                averageScorePerExamTypeByTerm,
+                averagePointsPerExamTypeByTerm,
+                overallGradePerExamTypeByTerm
         );
     }
 
-    private String calculateOverallGrade(double averagePoints) {
+    private String calculateOverallGradeForExamType(double averagePoints) {
         List<GradeCriteriaResponseDTO> gradeCriteriaList = configurationServiceClient.getAllGrades();
         String overallGrade = "F"; // Default grade
 
         for (GradeCriteriaResponseDTO criteria : gradeCriteriaList) {
+            // Assuming grade criteria points are in descending order, find the first criteria that averagePoints meets
             if (averagePoints >= criteria.getPoints()) {
                 overallGrade = criteria.getGrade();
                 break;

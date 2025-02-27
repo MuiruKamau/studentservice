@@ -18,14 +18,14 @@ public class StudentReportResponseDTO {
     private String streamName;
     private LocalDate reportDate;
     private List<ExamResponseDTO> results;
-    private Map<String, Double> averageScorePerExamType; // New field for average score per exam type
-    private Integer totalPoints;
-    private String overallGrade;
 
-    // Calculated fields that could be added (optional)
-    private Double averagePoints;  // Average points per subject
+    // Modified to be maps of Term -> Map<ExamType, Value>
+    private Map<String, Map<String, Double>> averageScorePerExamType; // Term -> (ExamType -> Average Score)
+    private Map<String, Map<String, Double>> averagePointsPerExamType; // Term -> (ExamType -> Average Points)
+    private Map<String, Map<String, String>> overallGradePerExamType;  // Term -> (ExamType -> Overall Grade)
 
-    public StudentReportResponseDTO(Long studentId, String studentName, String admissionNumber, Long classId, Long streamId, String className, String streamName, LocalDate reportDate, List<ExamResponseDTO> results, Map<String, Double> averageScorePerExamType, Integer totalPoints, String overallGrade) {
+
+    public StudentReportResponseDTO(Long studentId, String studentName, String admissionNumber, Long classId, Long streamId, String className, String streamName, LocalDate reportDate, List<ExamResponseDTO> results, Map<String, Map<String, Double>> averageScorePerExamType, Map<String, Map<String, Double>> averagePointsPerExamType, Map<String, Map<String, String>> overallGradePerExamType) {
         this.studentId = studentId;
         this.studentName = studentName;
         this.admissionNumber = admissionNumber;
@@ -35,11 +35,8 @@ public class StudentReportResponseDTO {
         this.streamName = streamName;
         this.reportDate = reportDate;
         this.results = results;
-        this.averageScorePerExamType = averageScorePerExamType; // Set averageScorePerExamType
-        this.totalPoints = totalPoints;
-        this.overallGrade = overallGrade;
-
-        // Calculate and set the average points
-        this.averagePoints = results.isEmpty() ? 0.0 : (double) totalPoints / results.size();
+        this.averageScorePerExamType = averageScorePerExamType;
+        this.averagePointsPerExamType = averagePointsPerExamType;
+        this.overallGradePerExamType = overallGradePerExamType;
     }
 }
