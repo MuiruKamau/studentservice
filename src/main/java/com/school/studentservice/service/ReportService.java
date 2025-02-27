@@ -7,9 +7,7 @@ import com.school.studentservice.dto.StudentReportResponseDTO;
 import com.school.studentservice.dto.SchoolClassResponseDTO;
 import com.school.studentservice.dto.StreamResponseDTO;
 import com.school.studentservice.dto.LearningSubjectResponseDTO;
-import com.school.studentservice.entity.ExamType;
 import com.school.studentservice.entity.Student;
-import com.school.studentservice.entity.Term;
 import com.school.studentservice.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,19 +42,21 @@ public class ReportService {
         StreamResponseDTO streamDto = configurationServiceClient.getStreamById(student.getStreamId());
         String streamName = (streamDto != null) ? streamDto.getName() : "N/A";
 
-        // Get exams with filters
-        List<ExamResponseDTO> examResults = examService.getExamsByStudentIdWithFilters(studentId, term, examType, subject);
+        // Get all exams for student -  Filters are ignored based on the prompt
+        List<ExamResponseDTO> examResults = examService.getExamsByStudentId(studentId, null, null); // Term and subject filters removed
 
         // Enhance ExamResponseDTOs in results to include subject names
         List<ExamResponseDTO> enhancedExamResults = examResults.stream()
                 .map(this::enhanceExamResponseWithSubjectName)
                 .collect(Collectors.toList());
 
-        // Calculate average score
-        double averageScore = enhancedExamResults.stream()
-                .mapToDouble(ExamResponseDTO::getScore)
-                .average()
-                .orElse(0.0);
+        // Calculate average score per exam type
+        Map<String, Double> averageScorePerExamType = enhancedExamResults.stream()
+                .collect(Collectors.groupingBy(
+                        exam -> exam.getExamType().getValue(), // Changed to get String value of ExamType
+                        Collectors.averagingDouble(ExamResponseDTO::getScore)
+                ));
+
 
         // Calculate total grade points
         int totalPoints = enhancedExamResults.stream()
@@ -82,7 +82,7 @@ public class ReportService {
                 streamName,
                 LocalDate.now(),
                 enhancedExamResults,
-                averageScore,
+                averageScorePerExamType, // Using averageScorePerExamType
                 totalPoints,
                 overallGrade
         );
@@ -109,22 +109,28 @@ public class ReportService {
     }
 
     private StudentReportResponseDTO generateStudentReportForClassReport(Student student, String term, String examType, String subject) {
-        // Get exams with filters
-        List<ExamResponseDTO> examResults = examService.getExamsByStudentIdWithFilters(student.getId(), term, examType, subject);
+        // Get exams with filters - Filters are ignored based on the prompt
+        List<ExamResponseDTO> examResults = examService.getExamsByStudentId(student.getId(), null, null); // Term and subject filters removed
 
-        // Calculate average score
-        double averageScore = examResults.stream()
-                .mapToDouble(ExamResponseDTO::getScore)
-                .average()
-                .orElse(0.0);
+        // Enhance ExamResponseDTOs in results to include subject names
+        List<ExamResponseDTO> enhancedExamResults = examResults.stream()
+                .map(this::enhanceExamResponseWithSubjectName)
+                .collect(Collectors.toList());
+
+        // Calculate average score per exam type
+        Map<String, Double> averageScorePerExamType = enhancedExamResults.stream()
+                .collect(Collectors.groupingBy(
+                        exam -> exam.getExamType().getValue(), // Changed to get String value of ExamType
+                        Collectors.averagingDouble(ExamResponseDTO::getScore)
+                ));
 
         // Calculate total grade points
-        int totalPoints = examResults.stream()
+        int totalPoints = enhancedExamResults.stream()
                 .mapToInt(ExamResponseDTO::getGradePoints)
                 .sum();
 
         // Calculate average grade points
-        int numberOfSubjects = examResults.size();
+        int numberOfSubjects = enhancedExamResults.size();
         double totalAveragePoints = numberOfSubjects > 0
                 ? (double) totalPoints / numberOfSubjects
                 : 0.0;
@@ -149,8 +155,8 @@ public class ReportService {
                 className,
                 streamName,
                 LocalDate.now(),
-                examResults,
-                averageScore,
+                enhancedExamResults,
+                averageScorePerExamType, // Using averageScorePerExamType
                 totalPoints,
                 overallGrade
         );
@@ -189,59 +195,3 @@ public class ReportService {
         );
     }
 }
-
-
-
-
-//package com.school.studentservice.service;
-//
-//import com.school.studentservice.dto.ExamResponseDTO;
-//import com.school.studentservice.dto.StudentReportResponseDTO;
-//import com.school.studentservice.entity.Student;
-//import com.school.studentservice.repository.StudentRepository;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.stereotype.Service;
-//import java.time.LocalDate;
-//import java.util.List;
-//import java.util.stream.Collectors;
-//
-//@Service
-//public class ReportService {
-//
-//    private final StudentRepository studentRepository;
-//    private final ExamService examService; // Inject ExamService
-//
-//    @Autowired
-//    public ReportService(StudentRepository studentRepository, ExamService examService) {
-//        this.studentRepository = studentRepository;
-//        this.examService = examService;
-//    }
-//
-//    public StudentReportResponseDTO generateStudentReport(Long studentId) {
-//        Student student = studentRepository.findById(studentId)
-//                .orElseThrow(() -> new IllegalArgumentException("Student not found with id: " + studentId));
-//
-//        List<ExamResponseDTO> examResults = examService.getExamsByStudentId(studentId);
-//
-//        double averageScore = examResults.stream()
-//                .mapToDouble(ExamResponseDTO::getScore) // Use mapToDouble as score is double
-//                .average()
-//                .orElse(0.0);
-//
-//        int totalPoints = examResults.stream()
-//                .mapToInt(exam -> (int) exam.getGradePoints()) // Cast to int if getGradePoints is double or needs explicit casting
-//                .sum();
-//
-//        return new StudentReportResponseDTO(
-//                student.getId(),
-//                student.getName(),
-//                student.getAdmissionNumber(),
-//                student.getClassName(), // Use className directly as String
-//                student.getStreamName(), // Use streamName directly as String
-//                LocalDate.now(), // Report Date
-//                examResults,
-//                averageScore,
-//                totalPoints
-//        );
-//    }
-//}

@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -17,14 +18,14 @@ public class StudentReportResponseDTO {
     private String streamName;
     private LocalDate reportDate;
     private List<ExamResponseDTO> results;
-    private Double averageScore;
+    private Map<String, Double> averageScorePerExamType; // New field for average score per exam type
     private Integer totalPoints;
     private String overallGrade;
 
     // Calculated fields that could be added (optional)
     private Double averagePoints;  // Average points per subject
 
-    public StudentReportResponseDTO(Long studentId, String studentName, String admissionNumber, Long classId, Long streamId, String className, String streamName, LocalDate reportDate, List<ExamResponseDTO> results, Double averageScore, Integer totalPoints, String overallGrade) {
+    public StudentReportResponseDTO(Long studentId, String studentName, String admissionNumber, Long classId, Long streamId, String className, String streamName, LocalDate reportDate, List<ExamResponseDTO> results, Map<String, Double> averageScorePerExamType, Integer totalPoints, String overallGrade) {
         this.studentId = studentId;
         this.studentName = studentName;
         this.admissionNumber = admissionNumber;
@@ -34,7 +35,7 @@ public class StudentReportResponseDTO {
         this.streamName = streamName;
         this.reportDate = reportDate;
         this.results = results;
-        this.averageScore = averageScore;
+        this.averageScorePerExamType = averageScorePerExamType; // Set averageScorePerExamType
         this.totalPoints = totalPoints;
         this.overallGrade = overallGrade;
 

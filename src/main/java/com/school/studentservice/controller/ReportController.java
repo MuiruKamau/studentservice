@@ -21,33 +21,61 @@ public class ReportController {
         this.reportService = reportService;
     }
 
+    // Endpoint to get student report for ALL exam types
     @GetMapping("/students/{studentId}")
     @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'ADMINISTRATOR')")
     public ResponseEntity<StudentReportResponseDTO> getStudentReport(
-            @PathVariable Long studentId,
-            @RequestParam(value = "term", required = false) String term,
-            @RequestParam(value = "examType", required = false) String examType,
-            @RequestParam(value = "subject", required = false) String subject
+            @PathVariable Long studentId
     ) {
         try {
-            StudentReportResponseDTO report = reportService.generateStudentReport(studentId, term, examType, subject);
+            StudentReportResponseDTO report = reportService.generateStudentReport(studentId, null, null, null); // Pass nulls to indicate no filter
             return new ResponseEntity<>(report, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
+    // Endpoint to get student report for a SPECIFIC exam type
+    @GetMapping("/students/{studentId}/{examType}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'ADMINISTRATOR')")
+    public ResponseEntity<StudentReportResponseDTO> getStudentReportByExamType(
+            @PathVariable Long studentId,
+            @PathVariable String examType // Exam type is now part of the path
+    ) {
+        try {
+            StudentReportResponseDTO report = reportService.generateStudentReport(studentId, null, examType, null); // Pass examType to filter
+            return new ResponseEntity<>(report, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+
+    // Endpoint to get class report for ALL exam types
     @GetMapping("/classes/{classId}")
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMINISTRATOR')")
     public ResponseEntity<List<StudentReportResponseDTO>> getClassReport(
             @PathVariable Long classId,
-            @RequestParam(value = "stream", required = false) String stream,
-            @RequestParam(value = "term", required = false) String term,
-            @RequestParam(value = "examType", required = false) String examType,
-            @RequestParam(value = "subject", required = false) String subject
+            @RequestParam(value = "stream", required = false) String stream
     ) {
         try {
-            List<StudentReportResponseDTO> reports = reportService.generateClassReport(classId, stream, term, examType, subject);
+            List<StudentReportResponseDTO> reports = reportService.generateClassReport(classId, stream, null, null, null); // Pass nulls to indicate no filter
+            return new ResponseEntity<>(reports, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // Endpoint to get class report for a SPECIFIC exam type
+    @GetMapping("/classes/{classId}/{examType}")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMINISTRATOR')")
+    public ResponseEntity<List<StudentReportResponseDTO>> getClassReportByExamType(
+            @PathVariable Long classId,
+            @PathVariable String examType, // Exam type is now part of the path
+            @RequestParam(value = "stream", required = false) String stream
+    ) {
+        try {
+            List<StudentReportResponseDTO> reports = reportService.generateClassReport(classId, stream, null, examType, null); // Pass examType to filter
             return new ResponseEntity<>(reports, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
