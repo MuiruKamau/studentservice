@@ -1,50 +1,54 @@
 package com.school.studentservice.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Data
+@NoArgsConstructor
 @Table(name = "students")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Student {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
     private String name;
-
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String admissionNumber;
-
-    @Column(nullable = false)
     private LocalDate dateOfBirth;
-
-    @Column(nullable = false)
     private LocalDate enrollmentDate;
-
-    @Column(nullable = false, name = "student_address") // Rename Student's address column
-    private String address;
-
-    @Column(nullable = false)
+    @Column(name = "student_address") // Map to student_address column
+    private String address; // **Re-add address field to Student entity**
     private String contactNumber;
-
     @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "parentName", column = @Column(name = "parent_name")),
-            @AttributeOverride(name = "contact", column = @Column(name = "parent_contact")),
-            @AttributeOverride(name = "address", column = @Column(name = "parent_address"))
-    })
     private ParentDetails parentDetails;
-
-    @Column(nullable = false)
     private Long classId;
-
-    @Column(nullable = false)
     private Long streamId;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Exam> exams;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "student_learning_subjects",
+            joinColumns = @JoinColumn(name = "student_id"),
+            inverseJoinColumns = @JoinColumn(name = "learning_subject_id")
+    )
+    private Set<LearningSubject> learningSubjects = new HashSet<>();
+
+    public Student(Long id, String name, String admissionNumber, LocalDate dateOfBirth, LocalDate enrollmentDate, String address, String contactNumber, ParentDetails parentDetails, Long classId, Long streamId, Set<LearningSubject> learningSubjects) {
+        this.id = id;
+        this.name = name;
+        this.admissionNumber = admissionNumber;
+        this.dateOfBirth = dateOfBirth;
+        this.enrollmentDate = enrollmentDate;
+        this.address = address; // **Re-add address initialization**
+        this.contactNumber = contactNumber;
+        this.parentDetails = parentDetails;
+        this.classId = classId;
+        this.streamId = streamId;
+        this.learningSubjects = learningSubjects;
+    }
 }

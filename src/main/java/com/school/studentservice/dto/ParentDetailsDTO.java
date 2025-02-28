@@ -1,10 +1,11 @@
 package com.school.studentservice.dto;
 
 import lombok.Data;
-import lombok.NoArgsConstructor; // Keep NoArgsConstructor if needed
+import lombok.NoArgsConstructor;
+import lombok.Builder; // Import Builder
 
 @Data
-@NoArgsConstructor // Keep NoArgsConstructor if you need it
+@NoArgsConstructor
 public class ParentDetailsDTO {
     private String parentName;
     private String contact;
